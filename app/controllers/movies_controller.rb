@@ -12,7 +12,12 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.ratings
-    @movies = Movie.order(params[:sort]).all
+    if(params[:sort] != nil && params[:sort] != 'none')
+      @movies = Movie.order(params[:sort]).all
+    else
+      @movies = Movie.all
+    end
+    
     @sort_by = params[:sort]
     @ratings_hash = Hash[*@all_ratings.map {|key| [key, 1]}.flatten]
     
