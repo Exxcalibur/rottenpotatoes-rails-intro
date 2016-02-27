@@ -16,11 +16,30 @@ class MoviesController < ApplicationController
     @sort_by = params[:sort]
     @ratings_hash = Hash[*@all_ratings.map {|key| [key, 1]}.flatten]
     
+    if (params[:session] == "clear")
+      session[:sort] = nil
+      session[:ratings] = nil
+    end
+    
     if(params[:ratings] != nil)
       @ratings_hash = params[:ratings]
       @movies = @movies.where(:rating => @ratings_hash.keys)
+      session[:ratings] = @ratings_hash
     end
     
+    if (params[:sort] != nil)
+      if (params[:sort] == "title")
+        session[:sort] = "title"
+      elsif (params[:sort] == "release_date")
+        session[:sort] = "release_date"
+      end
+    end
+    
+    if (params[:sort] == nil || params[:ratings] == nil)
+      redirect_hash = (session[:ratings] != nil) ? Hash[*session[:ratings].keys.map {|key| ["ratings[#{key}]", 1]}.flatten] : { :ratings => @ratings_hash }
+      redirect_hash[:sort] = (session[:sort] != nil) ? session[:sort] : "none"
+      redirect_to movies_path(redirect_hash) and return
+    end
     
   end
 
